@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="description" content="Complete Kubernetes learning journey — from zero to production-ready SRE. Covers architecture, workloads, networking, security, observability and GitOps.">
+<meta name="theme-color" content="#04080f">
+<!-- Open Graph for GitHub preview -->
+<meta property="og:title" content="Kubernetes Learning Journey">
+<meta property="og:description" content="Complete K8s guide: Zero → Expert SRE. CKA/CKAD/CKS aligned. BFSI focus.">
+<meta property="og:type" content="website">
+<title>K8s Learning Journey | Zero → Expert SRE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root {
+  --bg:      #04080f;
+  --bg2:     #080f1a;
+  --panel:   #0d1626;
+  --border:  #1a2d4a;
+  --accent:  #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #10b981;
+  --accent4: #f59e0b;
+  --accent5: #ef4444;
+  --text:    #e2eaf8;
+  --muted:   #4a6080;
+  --nav-h:   52px;
+}
+
+/* ============================================================
+   RESET & BASE
+============================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Grid background */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+}
+
+/* Ambient orbs — hidden on small screens for perf */
+.orb {
+  position:fixed; border-radius:50%;
+  filter:blur(80px); pointer-events:none; z-index:0;
+}
+.orb1 { width:400px;height:400px;background:rgba(0,212,255,0.06);top:-100px;right:-100px; }
+.orb2 { width:300px;height:300px;background:rgba(124,58,237,0.08);bottom:100px;left:-80px; }
+.orb3 { width:200px;height:200px;background:rgba(16,185,129,0.06);top:50%;right:10%; }
+
+@media(max-width:640px){
+  .orb1,.orb2,.orb3 { display:none; }
+}
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+.container {
+  position:relative; z-index:1;
+  max-width:1400px; margin:0 auto;
+  padding:0 20px;
+}
+
+@media(max-width:480px){
+  .container { padding:0 14px; }
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+header {
+  padding: 40px 0 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+
+.header-tag {
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  color:var(--accent);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:12px;
+  display:flex; align-items:center; gap:8px;
+}
+.header-tag::before { content:''; width:20px; height:1px; background:var(--accent); }
+
+h1 {
+  font-size: clamp(1.9rem, 6vw, 4rem);
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:-1px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 60%, var(--accent2) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:12px;
+}
+
+.header-desc {
+  color:var(--muted);
+  font-size:clamp(0.85rem,2.5vw,1rem);
+  max-width:600px;
+  line-height:1.6;
+}
+
+.header-meta {
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  margin-top:16px;
+}
+
+.badge {
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  padding:4px 10px;
+  border-radius:3px;
+  border:1px solid;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+.badge-blue   { border-color:var(--accent);  color:var(--accent);  background:rgba(0,212,255,0.08); }
+.badge-purple { border-color:var(--accent2); color:var(--accent2); background:rgba(124,58,237,0.08); }
+.badge-green  { border-color:var(--accent3); color:var(--accent3); background:rgba(16,185,129,0.08); }
+
+/* ============================================================
+   STICKY NAV — DESKTOP
+============================================================ */
+.nav-wrap {
+  position: sticky; top:0; z-index:200;
+  background: rgba(4,8,15,0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Desktop nav */
+.nav-desktop {
+  display:flex; gap:0; overflow-x:auto;
+  scrollbar-width:none;
+  max-width:1400px; margin:0 auto; padding:0 20px;
+}
+.nav-desktop::-webkit-scrollbar { display:none; }
+
+.nav-btn {
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:15px 16px;
+  background:none; border:none;
+  color:var(--muted);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+  transition:all 0.2s;
+  -webkit-tap-highlight-color:transparent;
+  flex-shrink:0;
+}
+.nav-btn:hover  { color:var(--text); }
+.nav-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* Hamburger (mobile only) */
+.nav-mobile-bar {
+  display:none;
+  align-items:center; justify-content:space-between;
+  padding:0 16px;
+  height:var(--nav-h);
+}
+
+.nav-mobile-title {
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  color:var(--accent);
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.hamburger {
+  width:36px; height:36px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;
+  background:none; border:1px solid var(--border); border-radius:6px;
+  cursor:pointer; padding:0;
+  -webkit-tap-highlight-color:transparent;
+}
+.hamburger span {
+  display:block; width:18px; height:2px;
+  background:var(--text);
+  border-radius:1px;
+  transition:all 0.2s;
+}
+.hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity:0; }
+.hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+/* Mobile dropdown menu */
+.nav-drawer {
+  display:none;
+  flex-direction:column;
+  border-top:1px solid var(--border);
+  background:rgba(4,8,15,0.98);
+  max-height:0; overflow:hidden;
+  transition:max-height 0.3s ease;
+}
+.nav-drawer.open { max-height:600px; }
+
+.nav-drawer .nav-btn {
+  padding:14px 20px;
+  text-align:left;
+  border-bottom:1px solid rgba(26,45,74,0.4);
+  border-left:3px solid transparent;
+  font-size:11px;
+}
+.nav-drawer .nav-btn.active {
+  border-left-color:var(--accent);
+  border-bottom-color:rgba(26,45,74,0.4);
+  background:rgba(0,212,255,0.04);
+}
+
+@media(max-width:768px){
+  .nav-desktop   { display:none; }
+  .nav-mobile-bar{ display:flex; }
+  .nav-drawer    { display:flex; }
+}
+
+/* ============================================================
+   MAIN CONTENT AREA
+============================================================ */
+.content-wrap {
+  position:relative; z-index:1;
+  padding:40px 0 20px;
+}
+
+@media(max-width:640px){ .content-wrap { padding:24px 0 16px; } }
+
+/* ============================================================
+   SECTIONS
+============================================================ */
+.section { display:none; animation: fadeIn 0.25s ease; }
+.section.active { display:block; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ============================================================
+   SECTION HEADER
+============================================================ */
+.section-header {
+  display:flex; align-items:flex-start; gap:20px;
+  margin-bottom:32px;
+}
+
+.section-icon {
+  width:52px; height:52px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+}
+
+.section-title { font-size:clamp(1.4rem,4vw,1.8rem); font-weight:800; margin-bottom:4px; }
+.section-desc  { color:var(--muted); font-size:0.9rem; line-height:1.6; }
+
+@media(max-width:480px){
+  .section-header { gap:14px; margin-bottom:24px; }
+  .section-icon   { width:42px; height:42px; font-size:18px; }
+}
+
+/* ============================================================
+   GRIDS
+============================================================ */
+.grid { display:grid; gap:16px; }
+.grid-2 { grid-template-columns: repeat(auto-fill, minmax(min(100%,400px), 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fill, minmax(min(100%,280px), 1fr)); }
+
+@media(max-width:640px){
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   CARDS
+============================================================ */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+.card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--card-accent, var(--accent)), transparent);
+  opacity:0; transition:opacity 0.3s;
+}
+@media(hover:hover){
+  .card:hover { border-color:rgba(0,212,255,0.3); box-shadow:0 8px 32px rgba(0,212,255,0.06); }
+  .card:hover::before { opacity:1; }
+}
+
+.card-header {
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:14px;
+}
+
+.card-icon {
+  width:38px; height:38px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0;
+}
+
+.card-title { font-size:0.95rem; font-weight:700; letter-spacing:-0.3px; }
+.card-sub   { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; margin-top:2px; }
+.card-body  { color:var(--muted); font-size:0.86rem; line-height:1.7; }
+
+/* ============================================================
+   TOPIC LIST
+============================================================ */
+.topic-list { list-style:none; margin-top:14px; display:flex; flex-direction:column; gap:5px; }
+.topic-list li {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.77rem;
+  padding:6px 10px;
+  background:rgba(0,0,0,0.3);
+  border-radius:4px;
+  border-left:2px solid var(--card-accent, var(--accent));
+  color:var(--text);
+  display:flex; align-items:flex-start; gap:8px;
+  line-height:1.4;
+}
+.topic-list li::before { content:'▸'; color:var(--card-accent, var(--accent)); font-size:10px; margin-top:1px; flex-shrink:0; }
+
+/* ============================================================
+   CODE BLOCKS — mobile scrollable
+============================================================ */
+.code-block {
+  background:#000;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:16px;
+  margin:14px 0;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  position:relative;
+}
+
+.code-block-header {
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  color:var(--muted);
+  letter-spacing:1px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:flex; align-items:center; gap:8px;
+}
+.code-block-header::before {
+  content:'';
+  display:inline-block;
+  width:8px; height:8px; border-radius:50%;
+  background:var(--accent5);
+  box-shadow: 12px 0 0 var(--accent4), 24px 0 0 var(--accent3);
+  flex-shrink:0;
+}
+
+pre {
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.76rem;
+  line-height:1.7;
+  color:#a8d8ff;
+  white-space:pre;
+}
+
+@media(max-width:480px){ pre { font-size:0.7rem; } }
+
+.kw  { color:#c792ea; }
+.str { color:#c3e88d; }
+.cm  { color:#546e7a; }
+.key { color:#82aaff; }
+.val { color:#f78c6c; }
+.op  { color:#89ddff; }
+.num { color:#f78c6c; }
+
+/* ============================================================
+   ROADMAP TIMELINE
+============================================================ */
+.roadmap { position:relative; padding-left:36px; }
+.roadmap::before {
+  content:'';
+  position:absolute; left:10px; top:0; bottom:0; width:2px;
+  background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+}
+
+.roadmap-item { position:relative; margin-bottom:28px; }
+
+.roadmap-dot {
+  position:absolute; left:-30px; top:3px;
+  width:14px; height:14px; border-radius:50%;
+  border:2px solid var(--accent); background:var(--bg);
+  display:flex; align-items:center; justify-content:center;
+}
+.roadmap-dot::after {
+  content:''; width:5px; height:5px; border-radius:50%; background:var(--accent);
+}
+
+.roadmap-phase {
+  font-family:'Space Mono',monospace; font-size:9px;
+  color:var(--accent); letter-spacing:2px; text-transform:uppercase; margin-bottom:3px;
+}
+.roadmap-title { font-size:1rem; font-weight:700; margin-bottom:6px; }
+.roadmap-desc  { color:var(--muted); font-size:0.86rem; line-height:1.6; }
+
+.roadmap-tags  { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.roadmap-tag {
+  font-family:'Space Mono',monospace; font-size:9px;
+  padding:2px 7px; border-radius:3px;
+  background:rgba(0,212,255,0.08);
+  border:1px solid rgba(0,212,255,0.2);
+  color:var(--accent);
+}
+
+/* ============================================================
+   PROGRESS BARS
+============================================================ */
+.progress-bar-wrap { margin-top:10px; }
+.progress-label {
+  display:flex; justify-content:space-between;
+  font-family:'Space Mono',monospace; font-size:9px; color:var(--muted); margin-bottom:5px;
+}
+.progress-track { height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden; }
+.progress-fill  {
+  height:100%; border-radius:2px;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+  animation: grow 1.2s ease both; transform-origin:left;
+}
+@keyframes grow { from{transform:scaleX(0);} to{transform:scaleX(1);} }
+
+/* ============================================================
+   COMMAND TABLE — collapses to stacked on mobile
+============================================================ */
+.cmd-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:8px; }
+
+.cmd-table { width:100%; border-collapse:collapse; }
+.cmd-table th {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:1px;
+  text-transform:uppercase; color:var(--muted); text-align:left;
+  padding:10px 14px; border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.cmd-table td { padding:9px 14px; border-bottom:1px solid rgba(26,45,74,0.4); vertical-align:top; }
+.cmd-table tr:last-child td { border-bottom:none; }
+@media(hover:hover){ .cmd-table tr:hover td { background:rgba(0,212,255,0.03); } }
+
+.cmd {
+  font-family:'JetBrains Mono',monospace; font-size:0.74rem;
+  color:var(--accent); display:block; white-space:nowrap;
+}
+.cmd-desc { font-size:0.82rem; color:var(--muted); line-height:1.4; }
+
+/* Stacked card layout on very small screens */
+@media(max-width:600px){
+  .cmd-table thead { display:none; }
+  .cmd-table tr    { display:block; padding:12px 0; border-bottom:1px solid var(--border); }
+  .cmd-table tr:last-child { border-bottom:none; }
+  .cmd-table td    { display:block; padding:2px 14px; border:none; }
+  .cmd { margin-bottom:4px; white-space:normal; word-break:break-all; }
+}
+
+/* ============================================================
+   DIVIDER
+============================================================ */
+.divider {
+  display:flex; align-items:center; gap:14px;
+  margin:32px 0;
+  color:var(--muted); font-family:'Space Mono',monospace;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase;
+}
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ============================================================
+   ARCHITECTURE DIAGRAM — scrollable on mobile
+============================================================ */
+.arch-diagram {
+  background:#000; border:1px solid var(--border);
+  border-radius:10px; padding:20px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.72rem; line-height:1.9;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  color:#a8d8ff; margin:20px 0;
+}
+.arch-diagram .ctrl  { color:var(--accent2); }
+.arch-diagram .label { color:var(--accent3); }
+.arch-diagram .cm    { color:var(--muted); }
+
+/* ============================================================
+   CALLOUT
+============================================================ */
+.callout {
+  border-left:3px solid var(--accent);
+  background:rgba(0,212,255,0.05);
+  border-radius:0 8px 8px 0;
+  padding:14px 18px; margin:14px 0;
+}
+.callout.warn   { border-color:var(--accent4); background:rgba(245,158,11,0.05); }
+.callout.tip    { border-color:var(--accent3); background:rgba(16,185,129,0.05); }
+.callout.danger { border-color:var(--accent5); background:rgba(239,68,68,0.05); }
+.callout-title {
+  font-family:'Space Mono',monospace; font-size:9px;
+  letter-spacing:2px; text-transform:uppercase; margin-bottom:5px; color:var(--accent);
+}
+.callout.warn .callout-title   { color:var(--accent4); }
+.callout.tip .callout-title    { color:var(--accent3); }
+.callout.danger .callout-title { color:var(--accent5); }
+.callout-body  { font-size:0.85rem; color:var(--muted); line-height:1.6; }
+
+/* ============================================================
+   COLOR THEMES
+============================================================ */
+.c-blue   { --card-accent: var(--accent); }
+.c-purple { --card-accent: var(--accent2); }
+.c-green  { --card-accent: var(--accent3); }
+.c-amber  { --card-accent: var(--accent4); }
+.c-red    { --card-accent: var(--accent5); }
+
+.bg-blue   { background:rgba(0,212,255,0.12); }
+.bg-purple { background:rgba(124,58,237,0.12); }
+.bg-green  { background:rgba(16,185,129,0.12); }
+.bg-amber  { background:rgba(245,158,11,0.12); }
+.bg-red    { background:rgba(239,68,68,0.12); }
+
+/* ============================================================
+   QUIZ
+============================================================ */
+.quiz-card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:12px; padding:20px; margin-bottom:16px;
+}
+.quiz-q { font-size:0.92rem; font-weight:600; margin-bottom:14px; line-height:1.5; }
+.quiz-options { display:flex; flex-direction:column; gap:8px; }
+
+.quiz-opt {
+  font-family:'JetBrains Mono',monospace; font-size:0.79rem;
+  padding:11px 14px;
+  border:1px solid var(--border); border-radius:6px;
+  cursor:pointer; background:rgba(0,0,0,0.2);
+  color:var(--text); transition:all 0.15s; text-align:left;
+  -webkit-tap-highlight-color:transparent;
+  line-height:1.4;
+}
+@media(hover:hover){ .quiz-opt:hover { border-color:var(--accent); background:rgba(0,212,255,0.05); } }
+.quiz-opt:active { transform:scale(0.98); }
+.quiz-opt.correct { border-color:var(--accent3); background:rgba(16,185,129,0.1); color:var(--accent3); }
+.quiz-opt.wrong   { border-color:var(--accent5); background:rgba(239,68,68,0.1);  color:var(--accent5); }
+
+.quiz-feedback { font-size:0.82rem; margin-top:10px; padding:10px 14px; border-radius:6px; display:none; line-height:1.5; }
+.quiz-feedback.show { display:block; }
+
+.quiz-score-display {
+  font-family:'Space Mono',monospace; font-size:13px;
+  color:var(--muted); margin-bottom:16px; text-align:center;
+}
+
+.btn-reset {
+  font-family:'Space Mono',monospace; font-size:11px;
+  padding:12px 28px;
+  background:rgba(0,212,255,0.08);
+  border:1px solid var(--accent); color:var(--accent);
+  border-radius:6px; cursor:pointer;
+  letter-spacing:1px; text-transform:uppercase;
+  transition:all 0.2s; display:block; margin:0 auto;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-reset:hover { background:rgba(0,212,255,0.15); }
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer {
+  margin-top:60px; padding:28px 0;
+  border-top:1px solid var(--border); text-align:center;
+  font-family:'Space Mono',monospace; font-size:10px;
+  color:var(--muted); letter-spacing:1px; line-height:1.8;
+}
+
+footer a {
+  color:var(--accent); text-decoration:none;
+}
+footer a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- HEADER -->
+<div class="container">
+  <header>
+    <div class="header-tag">DevOps / SRE Learning Path</div>
+    <h1>Kubernetes<br>Learning Journey</h1>
+    <p class="header-desc">A complete, structured guide from zero to production-ready — covering architecture, workloads, networking, security, observability and real-world SRE patterns.</p>
+    <div class="header-meta">
+      <span class="badge badge-blue">Zero → Expert</span>
+      <span class="badge badge-purple">BFSI / SRE Focus</span>
+      <span class="badge badge-green">12+ Modules</span>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;">Est. 60–90 hrs</span>
+    </div>
+  </header>
+</div>
+
+<!-- STICKY NAV -->
+<div class="nav-wrap" id="navWrap">
+  <!-- Desktop: horizontal scrollable tabs -->
+  <div class="nav-desktop" id="navDesktop">
+    <button class="nav-btn active" data-section="roadmap">🗺 Roadmap</button>
+    <button class="nav-btn" data-section="architecture">🏗 Architecture</button>
+    <button class="nav-btn" data-section="workloads">⚙️ Workloads</button>
+    <button class="nav-btn" data-section="networking">🌐 Networking</button>
+    <button class="nav-btn" data-section="storage">💾 Storage</button>
+    <button class="nav-btn" data-section="security">🔐 Security</button>
+    <button class="nav-btn" data-section="observability">📊 Observability</button>
+    <button class="nav-btn" data-section="cicd">🚀 CI/CD</button>
+    <button class="nav-btn" data-section="commands">⌨️ Commands</button>
+    <button class="nav-btn" data-section="quiz">🧠 Quiz</button>
+  </div>
+
+  <!-- Mobile: hamburger + drawer -->
+  <div class="nav-mobile-bar">
+    <span class="nav-mobile-title" id="mobileTitle">🗺 Roadmap</span>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="nav-drawer" id="navDrawer">
+    <button class="nav-btn active" data-section="roadmap">🗺 Roadmap</button>
+    <button class="nav-btn" data-section="architecture">🏗 Architecture</button>
+    <button class="nav-btn" data-section="workloads">⚙️ Workloads</button>
+    <button class="nav-btn" data-section="networking">🌐 Networking</button>
+    <button class="nav-btn" data-section="storage">💾 Storage</button>
+    <button class="nav-btn" data-section="security">🔐 Security</button>
+    <button class="nav-btn" data-section="observability">📊 Observability</button>
+    <button class="nav-btn" data-section="cicd">🚀 CI/CD</button>
+    <button class="nav-btn" data-section="commands">⌨️ Commands</button>
+    <button class="nav-btn" data-section="quiz">🧠 Quiz</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+<div class="content-wrap">
+
+<!-- ========================================================
+     ROADMAP
+======================================================== -->
+<div class="section active" id="roadmap">
+  <div class="section-header">
+    <div class="section-icon bg-blue">🗺</div>
+    <div>
+      <div class="section-title">Learning Roadmap</div>
+      <div class="section-desc">Structured phases from foundational concepts to expert-level production operations. Follow sequentially or jump to your current level.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🌱</div><div><div class="card-title">Phase 1 — Foundations</div><div class="card-sub">Weeks 1–2</div></div></div>
+      <div class="card-body">Containers, Docker, K8s concepts, kubectl basics, first deployment.</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span>Difficulty</span><span>Beginner</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:25%"></div></div>
+      </div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">⚡</div><div><div class="card-title">Phase 2 — Core Objects</div><div class="card-sub">Weeks 3–5</div></div></div>
+      <div class="card-body">Pods, Deployments, Services, ConfigMaps, Secrets, Namespaces, RBAC.</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span>Difficulty</span><span>Intermediate</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+    </div>
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">🔧</div><div><div class="card-title">Phase 3 — Production</div><div class="card-sub">Weeks 6–9</div></div></div>
+      <div class="card-body">Helm, Ingress, Network Policies, PVCs, HPA/VPA, Observability stack.</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span>Difficulty</span><span>Advanced</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:75%"></div></div>
+      </div>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">🏆</div><div><div class="card-title">Phase 4 — Expert SRE</div><div class="card-sub">Weeks 10–12</div></div></div>
+      <div class="card-body">GitOps, Operators, Multi-cluster, BFSI compliance patterns.</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span>Difficulty</span><span>Expert</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+    <div class="card c-red">
+      <div class="card-header"><div class="card-icon bg-red">🎯</div><div><div class="card-title">Certifications</div><div class="card-sub">Parallel track</div></div></div>
+      <div class="card-body">CKA → CKAD → CKS path aligned to career advancement goals.</div>
+      <ul class="topic-list">
+        <li>CKA — Administrator</li>
+        <li>CKAD — Developer</li>
+        <li>CKS — Security Specialist</li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🏦</div><div><div class="card-title">BFSI SRE Focus</div><div class="card-sub">Throughout</div></div></div>
+      <div class="card-body">Security-first design, compliance, zero-downtime deployments, DR strategies for banking workloads.</div>
+    </div>
+  </div>
+
+  <div class="divider">Detailed Roadmap</div>
+
+  <div class="roadmap">
+    <div class="roadmap-item">
+      <div class="roadmap-dot"></div>
+      <div class="roadmap-phase">Phase 1 · Week 1</div>
+      <div class="roadmap-title">Container Fundamentals</div>
+      <div class="roadmap-desc">Understand why containers exist, how Docker works, image layers, networking and volumes. Build and run your first containerized app.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">Docker</span><span class="roadmap-tag">OCI Images</span><span class="roadmap-tag">docker-compose</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot"></div>
+      <div class="roadmap-phase">Phase 1 · Week 2</div>
+      <div class="roadmap-title">K8s Concepts &amp; kubectl</div>
+      <div class="roadmap-desc">Control plane vs. worker nodes, etcd, API server, scheduler, kubelet. Install minikube/kind. Master kubectl imperative and declarative patterns.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">minikube</span><span class="roadmap-tag">kubectl</span><span class="roadmap-tag">YAML</span><span class="roadmap-tag">etcd</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent2)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent2)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent2)">Phase 2 · Week 3</div>
+      <div class="roadmap-title">Core Workload Objects</div>
+      <div class="roadmap-desc">Pod lifecycle, ReplicaSets, Deployments, StatefulSets, DaemonSets, Jobs and CronJobs. Understand when to use each workload type.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">Pods</span><span class="roadmap-tag">Deployments</span><span class="roadmap-tag">StatefulSets</span><span class="roadmap-tag">DaemonSets</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent2)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent2)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent2)">Phase 2 · Week 4</div>
+      <div class="roadmap-title">Networking &amp; Services</div>
+      <div class="roadmap-desc">ClusterIP, NodePort, LoadBalancer, ExternalName. Ingress controllers, DNS resolution (CoreDNS), Service Mesh basics (Istio/Linkerd).</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">Services</span><span class="roadmap-tag">Ingress</span><span class="roadmap-tag">CoreDNS</span><span class="roadmap-tag">Network Policies</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent2)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent2)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent2)">Phase 2 · Week 5</div>
+      <div class="roadmap-title">Config, Secrets &amp; RBAC</div>
+      <div class="roadmap-desc">ConfigMaps, Secrets (encryption at rest), Namespaces, ResourceQuotas, LimitRanges. ServiceAccounts, Roles, ClusterRoles and bindings.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">ConfigMaps</span><span class="roadmap-tag">Secrets</span><span class="roadmap-tag">RBAC</span><span class="roadmap-tag">ServiceAccounts</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent4)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent4)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent4)">Phase 3 · Week 6</div>
+      <div class="roadmap-title">Storage &amp; Persistence</div>
+      <div class="roadmap-desc">Volumes, PersistentVolumes, PVCs, StorageClasses, dynamic provisioning. CSI drivers. StatefulSet storage for Oracle DB on K8s.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">PV/PVC</span><span class="roadmap-tag">StorageClass</span><span class="roadmap-tag">CSI</span><span class="roadmap-tag">StatefulDB</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent4)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent4)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent4)">Phase 3 · Week 7</div>
+      <div class="roadmap-title">Scaling &amp; Reliability</div>
+      <div class="roadmap-desc">HPA, VPA, KEDA event-driven autoscaling. PodDisruptionBudgets, Affinity/AntiAffinity, Taints/Tolerations. Liveness/Readiness/Startup probes.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">HPA</span><span class="roadmap-tag">VPA</span><span class="roadmap-tag">KEDA</span><span class="roadmap-tag">PDB</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent4)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent4)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent4)">Phase 3 · Week 8</div>
+      <div class="roadmap-title">Observability Stack</div>
+      <div class="roadmap-desc">Prometheus + Grafana, kube-state-metrics, node-exporter. Structured logging with Fluentd/Loki. Distributed tracing with Jaeger/OpenTelemetry.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">Prometheus</span><span class="roadmap-tag">Grafana</span><span class="roadmap-tag">Loki</span><span class="roadmap-tag">OpenTelemetry</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent4)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent4)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent4)">Phase 3 · Week 9</div>
+      <div class="roadmap-title">Helm &amp; Package Management</div>
+      <div class="roadmap-desc">Helm 3 charts, templates, values, hooks. Helmfile for multi-chart management. Custom chart development for internal services.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">Helm 3</span><span class="roadmap-tag">Templates</span><span class="roadmap-tag">Helmfile</span><span class="roadmap-tag">OCI Registry</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent3)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent3)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent3)">Phase 4 · Week 10</div>
+      <div class="roadmap-title">GitOps &amp; CI/CD Integration</div>
+      <div class="roadmap-desc">ArgoCD, Flux CD GitOps patterns. Harness K8s pipelines, Tekton, GitHub Actions to cluster. Progressive delivery with Argo Rollouts.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">ArgoCD</span><span class="roadmap-tag">Harness</span><span class="roadmap-tag">Tekton</span><span class="roadmap-tag">Argo Rollouts</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent3)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent3)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent3)">Phase 4 · Week 11</div>
+      <div class="roadmap-title">Security Hardening (CKS Track)</div>
+      <div class="roadmap-desc">OPA/Gatekeeper, PodSecurityAdmission, Falco runtime security, image scanning (Trivy), Vault/CyberArk integration, mTLS with Istio.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">OPA</span><span class="roadmap-tag">Falco</span><span class="roadmap-tag">Trivy</span><span class="roadmap-tag">Vault</span><span class="roadmap-tag">mTLS</span></div>
+    </div>
+    <div class="roadmap-item">
+      <div class="roadmap-dot" style="border-color:var(--accent3)"><div style="width:5px;height:5px;border-radius:50%;background:var(--accent3)"></div></div>
+      <div class="roadmap-phase" style="color:var(--accent3)">Phase 4 · Week 12</div>
+      <div class="roadmap-title">OpenShift, Multi-Cluster &amp; DR</div>
+      <div class="roadmap-desc">OpenShift specifics (SCC, Routes), Cluster Federation, Velero backup, multi-cluster GitOps with ArgoCD ApplicationSets, chaos engineering.</div>
+      <div class="roadmap-tags"><span class="roadmap-tag">OpenShift</span><span class="roadmap-tag">Velero</span><span class="roadmap-tag">Multi-cluster</span><span class="roadmap-tag">Chaos</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     ARCHITECTURE
+======================================================== -->
+<div class="section" id="architecture">
+  <div class="section-header">
+    <div class="section-icon bg-blue">🏗</div>
+    <div>
+      <div class="section-title">Cluster Architecture</div>
+      <div class="section-desc">Control plane components, worker nodes, networking model and the full request lifecycle.</div>
+    </div>
+  </div>
+
+  <div class="arch-diagram">
+<span class="cm">┌──────────────────────── CONTROL PLANE ──────────────────────────┐</span>
+│                                                                   │
+│  <span class="ctrl">┌────────────────┐</span>  <span class="ctrl">┌──────────┐</span>  <span class="ctrl">┌────────────┐</span>  <span class="ctrl">┌───────────┐</span>  │
+│  <span class="ctrl">│ kube-apiserver │</span>  <span class="ctrl">│  etcd    │</span>  <span class="ctrl">│ scheduler  │</span>  <span class="ctrl">│ controller│</span>  │
+│  <span class="ctrl">│   :6443        │◄►│  :2379   │</span>  <span class="ctrl">│            │</span>  <span class="ctrl">│ manager   │</span>  │
+│  <span class="ctrl">└───────┬────────┘</span>  <span class="ctrl">└──────────┘</span>  <span class="ctrl">└────────────┘</span>  <span class="ctrl">└───────────┘</span>  │
+<span class="cm">└─────────┼─────────────────────────────────────────────────────────┘</span>
+          │  HTTPS
+<span class="cm">┌─────────▼──────────── WORKER NODE ──────────────────────────────┐</span>
+│  <span class="label">┌──────────┐</span>  <span class="label">┌──────────┐</span>  <span class="label">┌─────────────────────────────┐</span>  │
+│  <span class="label">│  kubelet │</span>  <span class="label">│kube-proxy│</span>  <span class="label">│ Pod                         │</span>  │
+│  <span class="label">└──────────┘</span>  <span class="label">└──────────┘</span>  <span class="label">│ ┌──────────┐ ┌──────────┐  │</span>  │
+│                             <span class="label">│ │container1│ │ sidecar  │  │</span>  │
+│                             <span class="label">│ └──────────┘ └──────────┘  │</span>  │
+│                             <span class="label">└─────────────────────────────┘</span>  │
+│  Container Runtime: containerd / CRI-O                          │
+<span class="cm">└─────────────────────────────────────────────────────────────────┘</span></div>
+
+  <div class="grid grid-2">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🧠</div><div><div class="card-title">API Server</div><div class="card-sub">kube-apiserver</div></div></div>
+      <div class="card-body">Single point of truth. All components communicate via REST. Handles auth, RBAC, admission control, and persists state to etcd.</div>
+      <ul class="topic-list">
+        <li>Authentication (x509, OIDC, SA tokens)</li>
+        <li>Authorization (RBAC, ABAC, Webhook)</li>
+        <li>Admission Controllers (Mutating/Validating Webhook)</li>
+        <li>Watch-based event streaming</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🗄</div><div><div class="card-title">etcd</div><div class="card-sub">Distributed KV Store</div></div></div>
+      <div class="card-body">Stores all cluster state. Distributed consensus via Raft protocol. Must be backed up regularly — this IS the cluster.</div>
+      <ul class="topic-list">
+        <li>Raft consensus — odd node count (3 or 5)</li>
+        <li>Backup: etcdctl snapshot save</li>
+        <li>Encrypt secrets at rest (EncryptionConfiguration)</li>
+        <li>Watch API for change notifications</li>
+      </ul>
+    </div>
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">📅</div><div><div class="card-title">Scheduler</div><div class="card-sub">kube-scheduler</div></div></div>
+      <div class="card-body">Watches for unscheduled Pods and assigns them to the best-fit Node using filtering, scoring, and custom plugins.</div>
+      <ul class="topic-list">
+        <li>Filtering → Scoring pipeline</li>
+        <li>NodeAffinity / PodAffinity / Anti-Affinity</li>
+        <li>Taints &amp; Tolerations</li>
+        <li>Custom scheduler framework plugins</li>
+      </ul>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">🔄</div><div><div class="card-title">Controller Manager</div><div class="card-sub">Reconciliation loops</div></div></div>
+      <div class="card-body">Watches desired vs actual state and takes corrective action. ReplicaSet, Deployment, Job controllers all live here.</div>
+      <ul class="topic-list">
+        <li>ReplicaSet controller (replica count)</li>
+        <li>Deployment controller (rolling updates)</li>
+        <li>Node controller (heartbeat)</li>
+        <li>CronJob controller</li>
+      </ul>
+    </div>
+    <div class="card c-red">
+      <div class="card-header"><div class="card-icon bg-red">🤝</div><div><div class="card-title">kubelet</div><div class="card-sub">Node Agent</div></div></div>
+      <div class="card-body">Runs on every worker node. Communicates with containerd to start/stop containers. Reports status back to API server.</div>
+      <ul class="topic-list">
+        <li>PodSpec execution via CRI</li>
+        <li>Volume mounting (CSI)</li>
+        <li>Probe execution (liveness/readiness)</li>
+        <li>Node resource reporting</li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🌐</div><div><div class="card-title">kube-proxy</div><div class="card-sub">Network Rules</div></div></div>
+      <div class="card-body">Maintains iptables/ipvs rules for Service-to-Pod routing. Implements ClusterIP virtual IPs and load-balancing.</div>
+      <ul class="topic-list">
+        <li>iptables mode (default)</li>
+        <li>IPVS mode (high perf — BFSI recommended)</li>
+        <li>eBPF mode (Cilium replacement)</li>
+        <li>EndpointSlices for large clusters</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider">kubectl apply → What Happens</div>
+  <div class="code-block">
+    <div class="code-block-header">request lifecycle</div>
+    <pre><span class="num">1.</span>  kubectl <span class="kw">→</span> kubeconfig <span class="kw">→</span> API Server (:6443) <span class="cm">// TLS + Auth</span>
+<span class="num">2.</span>  Auth <span class="kw">→</span> RBAC check <span class="kw">→</span> Admission Controllers
+<span class="num">3.</span>  Persisted to <span class="str">etcd</span>
+<span class="num">4.</span>  Deployment Controller <span class="kw">watches</span> <span class="kw">→</span> creates ReplicaSet
+<span class="num">5.</span>  ReplicaSet Controller <span class="kw">→</span> creates N Pods (Pending)
+<span class="num">6.</span>  Scheduler <span class="kw">→</span> assigns Node (Scheduled)
+<span class="num">7.</span>  kubelet <span class="kw">→</span> calls containerd <span class="kw">→</span> pulls image (Running)
+<span class="num">8.</span>  kubelet <span class="kw">→</span> runs probes <span class="kw">→</span> reports Ready
+<span class="num">9.</span>  kube-proxy <span class="kw">→</span> updates iptables rules</pre>
+  </div>
+</div>
+
+<!-- ========================================================
+     WORKLOADS
+======================================================== -->
+<div class="section" id="workloads">
+  <div class="section-header">
+    <div class="section-icon bg-purple">⚙️</div>
+    <div>
+      <div class="section-title">Workload Objects</div>
+      <div class="section-desc">Pods, Deployments, StatefulSets, DaemonSets, Jobs — when to use what.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">📦</div><div><div class="card-title">Pod</div><div class="card-sub">Atomic unit</div></div></div>
+      <div class="card-body">Smallest deployable unit. One or more containers sharing network namespace and volumes. Rarely created directly — use controllers.</div>
+      <div class="code-block">
+        <div class="code-block-header">pod.yaml</div>
+        <pre><span class="key">spec</span><span class="op">:</span>
+  <span class="key">containers</span><span class="op">:</span>
+  <span class="op">-</span> <span class="key">name</span><span class="op">:</span> <span class="str">api</span>
+    <span class="key">image</span><span class="op">:</span> <span class="str">payment-api:2.1.0</span>
+    <span class="key">resources</span><span class="op">:</span>
+      <span class="key">requests</span><span class="op">:</span> <span class="op">{</span><span class="key">cpu</span><span class="op">:</span> <span class="str">100m</span><span class="op">,</span> <span class="key">memory</span><span class="op">:</span> <span class="str">256Mi</span><span class="op">}</span>
+      <span class="key">limits</span><span class="op">:</span>   <span class="op">{</span><span class="key">cpu</span><span class="op">:</span> <span class="str">500m</span><span class="op">,</span> <span class="key">memory</span><span class="op">:</span> <span class="str">512Mi</span><span class="op">}</span>
+    <span class="key">livenessProbe</span><span class="op">:</span>
+      <span class="key">httpGet</span><span class="op">:</span>
+        <span class="key">path</span><span class="op">:</span> <span class="str">/health</span>
+        <span class="key">port</span><span class="op">:</span> <span class="num">8080</span></pre>
+      </div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🚀</div><div><div class="card-title">Deployment</div><div class="card-sub">Stateless workloads</div></div></div>
+      <div class="card-body">Manages ReplicaSets. Rolling updates, rollbacks, desired replica count. Go-to for stateless microservices.</div>
+      <div class="code-block">
+        <div class="code-block-header">rolling update strategy</div>
+        <pre><span class="key">strategy</span><span class="op">:</span>
+  <span class="key">type</span><span class="op">:</span> <span class="str">RollingUpdate</span>
+  <span class="key">rollingUpdate</span><span class="op">:</span>
+    <span class="key">maxSurge</span><span class="op">:</span> <span class="num">1</span>       <span class="cm"># extra pods</span>
+    <span class="key">maxUnavailable</span><span class="op">:</span> <span class="num">0</span> <span class="cm"># zero downtime</span>
+<span class="key">minReadySeconds</span><span class="op">:</span> <span class="num">30</span>
+
+<span class="cm"># Rollback</span>
+kubectl rollout undo deploy/payment-api</pre>
+      </div>
+    </div>
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">🗂</div><div><div class="card-title">StatefulSet</div><div class="card-sub">Stateful workloads</div></div></div>
+      <div class="card-body">Stable pod identity, ordered start/stop, stable persistent storage. Use for Kafka, Zookeeper, Oracle DB.</div>
+      <ul class="topic-list">
+        <li>Stable network identity: pod-0, pod-1, pod-2</li>
+        <li>volumeClaimTemplates — PVC per pod</li>
+        <li>Ordered rolling updates</li>
+        <li>Headless service for direct pod DNS</li>
+        <li>podManagementPolicy: Parallel</li>
+      </ul>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">👁</div><div><div class="card-title">DaemonSet</div><div class="card-sub">Node-level agents</div></div></div>
+      <div class="card-body">Ensures one pod per node. Perfect for log collectors, monitoring agents, network plugins.</div>
+      <ul class="topic-list">
+        <li>Fluentd / Filebeat log collection</li>
+        <li>node-exporter (Prometheus metrics)</li>
+        <li>Falco security runtime agent</li>
+        <li>CNI plugins (Calico, Cilium)</li>
+      </ul>
+    </div>
+    <div class="card c-red">
+      <div class="card-header"><div class="card-icon bg-red">⏰</div><div><div class="card-title">Jobs &amp; CronJobs</div><div class="card-sub">Batch workloads</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">cronjob.yaml</div>
+        <pre><span class="key">schedule</span><span class="op">:</span> <span class="str">"0 2 * * *"</span>   <span class="cm"># 2am daily</span>
+<span class="key">concurrencyPolicy</span><span class="op">:</span> <span class="str">Forbid</span>
+<span class="key">successfulJobsHistoryLimit</span><span class="op">:</span> <span class="num">3</span>
+<span class="key">jobTemplate</span><span class="op">:</span>
+  <span class="key">spec</span><span class="op">:</span>
+    <span class="key">backoffLimit</span><span class="op">:</span> <span class="num">3</span>
+    <span class="key">activeDeadlineSeconds</span><span class="op">:</span> <span class="num">3600</span></pre>
+      </div>
+    </div>
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🔁</div><div><div class="card-title">HPA / VPA / KEDA</div><div class="card-sub">Autoscaling</div></div></div>
+      <ul class="topic-list">
+        <li>HPA: scale replicas on CPU/memory %</li>
+        <li>VPA: adjust resource requests automatically</li>
+        <li>KEDA: scale on Kafka lag, queue depth</li>
+        <li>KEDA: ScaleToZero for cost optimization</li>
+        <li>PDB: minAvailable during disruptions</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider">Pod Design Patterns</div>
+  <div class="grid grid-3">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🚗</div><div><div class="card-title">Sidecar</div></div></div>
+      <div class="card-body">Extends main container. Envoy proxy, log shipper, secret injector. Shares network and volumes within same Pod.</div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🚪</div><div><div class="card-title">Init Container</div></div></div>
+      <div class="card-body">Runs before app containers. DB migration, config fetch, wait-for-dependency. Must exit 0 to proceed.</div>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">📡</div><div><div class="card-title">Ambassador</div></div></div>
+      <div class="card-body">Proxy sidecar handling TLS, retries, circuit breaking between main container and external services.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     NETWORKING
+======================================================== -->
+<div class="section" id="networking">
+  <div class="section-header">
+    <div class="section-icon bg-green">🌐</div>
+    <div>
+      <div class="section-title">Networking</div>
+      <div class="section-desc">Services, Ingress, Network Policies, DNS, Service Mesh.</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">K8s Networking Model</div>
+    <div class="callout-body">Every pod gets a unique IP. Pods communicate directly without NAT. Implemented by CNI plugins (Calico, Cilium, Flannel). Services provide stable virtual IPs over dynamic pods.</div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:20px;">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🔌</div><div><div class="card-title">Service Types</div><div class="card-sub">Stable endpoints</div></div></div>
+      <ul class="topic-list">
+        <li>ClusterIP — internal only (default)</li>
+        <li>NodePort — node :30000-32767</li>
+        <li>LoadBalancer — cloud LB (Azure/OCI)</li>
+        <li>ExternalName — CNAME alias</li>
+        <li>Headless (clusterIP: None) — StatefulSet DNS</li>
+      </ul>
+      <div class="code-block">
+        <div class="code-block-header">service.yaml</div>
+        <pre><span class="key">spec</span><span class="op">:</span>
+  <span class="key">selector</span><span class="op">:</span> <span class="op">{</span><span class="key">app</span><span class="op">:</span> <span class="str">payment-api</span><span class="op">}</span>
+  <span class="key">ports</span><span class="op">:</span>
+  <span class="op">-</span> <span class="key">port</span><span class="op">:</span> <span class="num">80</span>
+    <span class="key">targetPort</span><span class="op">:</span> <span class="num">8080</span>
+  <span class="key">sessionAffinity</span><span class="op">:</span> <span class="str">ClientIP</span></pre>
+      </div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🚦</div><div><div class="card-title">Ingress</div><div class="card-sub">L7 HTTP routing</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">ingress.yaml</div>
+        <pre><span class="key">rules</span><span class="op">:</span>
+<span class="op">-</span> <span class="key">host</span><span class="op">:</span> <span class="str">api.citi.internal</span>
+  <span class="key">http</span><span class="op">:</span>
+    <span class="key">paths</span><span class="op">:</span>
+    <span class="op">-</span> <span class="key">path</span><span class="op">:</span> <span class="str">/payments</span>
+      <span class="key">backend</span><span class="op">:</span>
+        <span class="key">service</span><span class="op">:</span>
+          <span class="key">name</span><span class="op">:</span> <span class="str">payment-api</span>
+          <span class="key">port</span><span class="op">:</span> <span class="op">{</span><span class="key">number</span><span class="op">:</span> <span class="num">80</span><span class="op">}</span>
+<span class="key">tls</span><span class="op">:</span>
+<span class="op">-</span> <span class="key">secretName</span><span class="op">:</span> <span class="str">tls-cert</span>
+  <span class="key">hosts</span><span class="op">:</span> <span class="op">[</span><span class="str">api.citi.internal</span><span class="op">]</span></pre>
+      </div>
+    </div>
+    <div class="card c-red">
+      <div class="card-header"><div class="card-icon bg-red">🛡</div><div><div class="card-title">Network Policies</div><div class="card-sub">BFSI critical</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">default-deny + allow</div>
+        <pre><span class="cm"># Deny all ingress/egress</span>
+<span class="key">spec</span><span class="op">:</span>
+  <span class="key">podSelector</span><span class="op">:</span> <span class="op">{}</span>
+  <span class="key">policyTypes</span><span class="op">:</span> <span class="op">[</span><span class="str">Ingress</span><span class="op">,</span><span class="str">Egress</span><span class="op">]</span>
+
+<span class="cm"># Allow only api-gateway ns</span>
+<span class="key">ingress</span><span class="op">:</span>
+<span class="op">-</span> <span class="key">from</span><span class="op">:</span>
+  <span class="op">-</span> <span class="key">namespaceSelector</span><span class="op">:</span>
+      <span class="key">matchLabels</span><span class="op">:</span>
+        <span class="key">name</span><span class="op">:</span> <span class="str">api-gateway</span></pre>
+      </div>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">🔗</div><div><div class="card-title">Service Mesh (Istio)</div><div class="card-sub">mTLS + traffic mgmt</div></div></div>
+      <ul class="topic-list">
+        <li>Automatic mTLS between all services</li>
+        <li>VirtualService — traffic splitting</li>
+        <li>DestinationRule — circuit breaking</li>
+        <li>Canary: 90/10 traffic split</li>
+        <li>AuthorizationPolicy — service RBAC</li>
+        <li>Jaeger integration — distributed tracing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider">CoreDNS Naming</div>
+  <div class="code-block">
+    <div class="code-block-header">cluster DNS format</div>
+    <pre><span class="cm"># Full format:</span>
+<span class="str">&lt;service&gt;.&lt;namespace&gt;.svc.cluster.local</span>
+
+<span class="cm"># Examples:</span>
+payment-api.production.svc.cluster.local
+kafka.messaging.svc.cluster.local
+
+<span class="cm"># StatefulSet pod DNS (headless):</span>
+kafka-0.kafka-headless.messaging.svc.cluster.local
+
+<span class="cm"># From same namespace — shorthand works:</span>
+curl http://payment-api/health</pre>
+  </div>
+</div>
+
+<!-- ========================================================
+     STORAGE
+======================================================== -->
+<div class="section" id="storage">
+  <div class="section-header">
+    <div class="section-icon bg-amber">💾</div>
+    <div>
+      <div class="section-title">Storage &amp; Persistence</div>
+      <div class="section-desc">Volumes, PVs, PVCs, StorageClasses and CSI drivers for stateful workloads.</div>
+    </div>
+  </div>
+  <div class="grid grid-2">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">💿</div><div><div class="card-title">PV Lifecycle</div></div></div>
+      <ul class="topic-list">
+        <li>StorageClass → dynamic provisioning</li>
+        <li>PVC → binds to PV (1:1)</li>
+        <li>Pod mounts PVC as volume</li>
+        <li>ReclaimPolicy: Retain | Delete</li>
+        <li>AccessModes: RWO | ROX | RWX | RWOP</li>
+      </ul>
+      <div class="code-block">
+        <div class="code-block-header">pvc.yaml</div>
+        <pre><span class="key">spec</span><span class="op">:</span>
+  <span class="key">accessModes</span><span class="op">:</span> <span class="op">[</span><span class="str">ReadWriteOnce</span><span class="op">]</span>
+  <span class="key">storageClassName</span><span class="op">:</span> <span class="str">azure-managed</span>
+  <span class="key">resources</span><span class="op">:</span>
+    <span class="key">requests</span><span class="op">:</span>
+      <span class="key">storage</span><span class="op">:</span> <span class="str">50Gi</span></pre>
+      </div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🗃</div><div><div class="card-title">StorageClass Examples</div><div class="card-sub">Azure / OCI / On-prem</div></div></div>
+      <ul class="topic-list">
+        <li>azure-managed-premium (SSD, RWO)</li>
+        <li>azure-file (NFS-based, RWX)</li>
+        <li>oci-block-storage (Block, RWO)</li>
+        <li>nfs-provisioner (on-prem, RWX)</li>
+        <li>local-storage (bare metal, fastest)</li>
+      </ul>
+    </div>
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">🔧</div><div><div class="card-title">Volume Types</div></div></div>
+      <ul class="topic-list">
+        <li>emptyDir — ephemeral, pod lifetime</li>
+        <li>hostPath — node filesystem (caution)</li>
+        <li>configMap / secret — config injection</li>
+        <li>projected — combine multiple sources</li>
+        <li>CSI — external storage plugins</li>
+      </ul>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">🏦</div><div><div class="card-title">DB on K8s — BFSI</div></div></div>
+      <ul class="topic-list">
+        <li>StatefulSet for Oracle DB (OCI CSI)</li>
+        <li>Velero for PV backup to object storage</li>
+        <li>Separate namespace + NetworkPolicy</li>
+        <li>Anti-affinity across AZs</li>
+        <li>ResourceQuota to isolate noisy neighbors</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     SECURITY
+======================================================== -->
+<div class="section" id="security">
+  <div class="section-header">
+    <div class="section-icon bg-red">🔐</div>
+    <div>
+      <div class="section-title">Security</div>
+      <div class="section-desc">RBAC, PodSecurity, Secrets management, OPA, runtime security. Critical for BFSI compliance.</div>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <div class="callout-title">BFSI Security Baseline</div>
+    <div class="callout-body">Default-deny NetworkPolicies · No privileged containers · Secrets encrypted at rest · Image scanning in CI · Audit logging to SIEM · CyberArk/Vault for dynamic secrets · Least-privilege RBAC per ServiceAccount.</div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top:20px;">
+    <div class="card c-red">
+      <div class="card-header"><div class="card-icon bg-red">👥</div><div><div class="card-title">RBAC</div><div class="card-sub">Role-Based Access Control</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">least-privilege role</div>
+        <pre><span class="key">kind</span><span class="op">:</span> <span class="str">Role</span>
+<span class="key">rules</span><span class="op">:</span>
+<span class="op">-</span> <span class="key">apiGroups</span><span class="op">:</span> <span class="op">[</span><span class="str">""</span><span class="op">]</span>
+  <span class="key">resources</span><span class="op">:</span> <span class="op">[</span><span class="str">pods</span><span class="op">,</span><span class="str">pods/log</span><span class="op">]</span>
+  <span class="key">verbs</span><span class="op">:</span> <span class="op">[</span><span class="str">get</span><span class="op">,</span><span class="str">list</span><span class="op">,</span><span class="str">watch</span><span class="op">]</span>
+<span class="cm"># Never cluster-admin for app SAs</span></pre>
+      </div>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🔒</div><div><div class="card-title">Pod Security</div><div class="card-sub">PSA (K8s 1.25+)</div></div></div>
+      <ul class="topic-list">
+        <li>privileged — no restrictions (avoid)</li>
+        <li>baseline — prevents obvious escapes</li>
+        <li>restricted — hardened (BFSI target)</li>
+        <li>runAsNonRoot: true</li>
+        <li>readOnlyRootFilesystem: true</li>
+        <li>allowPrivilegeEscalation: false</li>
+        <li>seccompProfile: RuntimeDefault</li>
+      </ul>
+    </div>
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">🗝</div><div><div class="card-title">Secrets Management</div></div></div>
+      <ul class="topic-list">
+        <li>Encrypt etcd at rest (EncryptionConfig)</li>
+        <li>External Secrets Operator → CyberArk/Vault</li>
+        <li>Vault Agent Injector (sidecar)</li>
+        <li>Never bake secrets into images</li>
+        <li>Rotate without pod restart (projected vol)</li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">📋</div><div><div class="card-title">OPA / Gatekeeper</div><div class="card-sub">Policy as Code</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">rego — require limits</div>
+        <pre><span class="kw">violation</span><span class="op">[{</span><span class="str">"msg"</span><span class="op">:</span> msg<span class="op">}]</span> <span class="op">{</span>
+  c := input.review.object
+         .spec.containers[_]
+  <span class="kw">not</span> c.resources.limits
+  msg := <span class="str">"Limits required"</span>
+<span class="op">}</span></pre>
+      </div>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">👁</div><div><div class="card-title">Runtime Security</div><div class="card-sub">Falco + Audit Logs</div></div></div>
+      <ul class="topic-list">
+        <li>Falco: detects syscall anomalies</li>
+        <li>Alert: shell in container, sensitive file read</li>
+        <li>K8s Audit Policy → Splunk / SIEM</li>
+        <li>Image scanning: Trivy in CI, Twistlock prod</li>
+        <li>Only signed images (Cosign/Notary)</li>
+      </ul>
+    </div>
+    <div class="card c-red">
+      <div class="card-header"><div class="card-icon bg-red">🧱</div><div><div class="card-title">OpenShift SCC</div><div class="card-sub">SecurityContextConstraints</div></div></div>
+      <ul class="topic-list">
+        <li>OCP alternative to PodSecurityAdmission</li>
+        <li>restricted-v2 (default / BFSI baseline)</li>
+        <li>anyuid — legacy apps needing root</li>
+        <li>privileged — infra components only</li>
+        <li>Assigned via RoleBinding to ServiceAccount</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     OBSERVABILITY
+======================================================== -->
+<div class="section" id="observability">
+  <div class="section-header">
+    <div class="section-icon bg-blue">📊</div>
+    <div>
+      <div class="section-title">Observability</div>
+      <div class="section-desc">Metrics, logging and tracing — the three pillars. Integrated with your AppDynamics and Splunk stack.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">📈</div><div><div class="card-title">Prometheus Stack</div><div class="card-sub">Metrics</div></div></div>
+      <ul class="topic-list">
+        <li>kube-state-metrics — K8s object state</li>
+        <li>node-exporter — host-level metrics</li>
+        <li>cAdvisor — container resource usage</li>
+        <li>ServiceMonitor CRD — auto-discover</li>
+        <li>PrometheusRule CRD — alerting</li>
+      </ul>
+      <div class="code-block">
+        <div class="code-block-header">critical PromQL</div>
+        <pre><span class="cm"># CPU throttle %</span>
+rate(container_cpu_cfs_throttled_seconds_total[5m])
+/ rate(container_cpu_cfs_periods_total[5m])
+
+<span class="cm"># Pod restart rate</span>
+rate(kube_pod_container_status_restarts_total[1h])
+
+<span class="cm"># Node memory available</span>
+node_memory_MemAvailable_bytes
+/ node_memory_MemTotal_bytes</pre>
+      </div>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">📊</div><div><div class="card-title">Grafana Dashboards</div></div></div>
+      <ul class="topic-list">
+        <li>ID 315 — K8s cluster overview</li>
+        <li>ID 8588 — K8s deployment metrics</li>
+        <li>ID 13032 — K8s API server</li>
+        <li>Custom SLO burn rate dashboards</li>
+        <li>Alertmanager → PagerDuty / ServiceNow</li>
+      </ul>
+    </div>
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">📝</div><div><div class="card-title">Loki Logging</div><div class="card-sub">PLG Stack</div></div></div>
+      <ul class="topic-list">
+        <li>Promtail DaemonSet — pod log collection</li>
+        <li>LogQL: {app="payment-api"} |= "ERROR"</li>
+        <li>Structured JSON logging recommended</li>
+        <li>Correlated with Grafana metrics</li>
+        <li>Retention policy for compliance</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">🔭</div><div><div class="card-title">OpenTelemetry</div><div class="card-sub">Distributed Tracing</div></div></div>
+      <ul class="topic-list">
+        <li>OTel Collector DaemonSet / Sidecar</li>
+        <li>Auto-instrumentation for Java (Spring Boot)</li>
+        <li>Traces → Jaeger / Tempo / Zipkin</li>
+        <li>Correlate: trace_id in logs + metrics</li>
+        <li>AppDynamics via OTel exporter</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="divider">SLO Definition</div>
+  <div class="code-block">
+    <div class="code-block-header">SLO — payment API availability</div>
+    <pre><span class="cm"># Error rate SLI</span>
+<span class="key">sum</span>(rate(http_requests_total{job=<span class="str">"payment-api"</span>,code=~<span class="str">"5.."</span>}[5m]))
+<span class="op">/</span>
+<span class="key">sum</span>(rate(http_requests_total{job=<span class="str">"payment-api"</span>}[5m]))
+
+<span class="cm"># SLO: 99.9% = error_rate &lt; 0.001</span>
+<span class="cm"># Error budget: 43.8 min/month</span>
+
+<span class="cm"># Burn rate alert</span>
+<span class="kw">alert</span>: SLOBurnRateHigh
+<span class="key">expr</span>: error_rate > <span class="num">0.05</span>
+<span class="key">for</span>: <span class="str">5m</span></pre>
+  </div>
+</div>
+
+<!-- ========================================================
+     CI/CD
+======================================================== -->
+<div class="section" id="cicd">
+  <div class="section-header">
+    <div class="section-icon bg-green">🚀</div>
+    <div>
+      <div class="section-title">CI/CD &amp; GitOps</div>
+      <div class="section-desc">Harness, Tekton, ArgoCD, Argo Rollouts — progressive delivery for zero-downtime BFSI deployments.</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card c-blue">
+      <div class="card-header"><div class="card-icon bg-blue">🎮</div><div><div class="card-title">Harness K8s Pipeline</div><div class="card-sub">Current stack</div></div></div>
+      <ul class="topic-list">
+        <li>Harness Delegate — in-cluster agent</li>
+        <li>K8s Rolling / Blue-Green / Canary steps</li>
+        <li>Approval gates with JIRA/ServiceNow</li>
+        <li>Harness Policy Engine (OPA)</li>
+        <li>CV — Continuous Verification (AppD)</li>
+        <li>Auto-rollback on metric degradation</li>
+      </ul>
+    </div>
+    <div class="card c-purple">
+      <div class="card-header"><div class="card-icon bg-purple">⚙️</div><div><div class="card-title">Tekton Pipelines</div><div class="card-sub">Native K8s CI</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">pipeline tasks</div>
+        <pre><span class="key">kind</span><span class="op">:</span> <span class="str">Pipeline</span>
+<span class="key">spec</span><span class="op">:</span>
+  <span class="key">tasks</span><span class="op">:</span>
+  <span class="op">-</span> <span class="key">name</span><span class="op">:</span> <span class="str">build</span>
+    <span class="key">taskRef</span><span class="op">:</span> <span class="op">{</span><span class="key">name</span><span class="op">:</span> <span class="str">buildah</span><span class="op">}</span>
+  <span class="op">-</span> <span class="key">name</span><span class="op">:</span> <span class="str">scan</span>
+    <span class="key">taskRef</span><span class="op">:</span> <span class="op">{</span><span class="key">name</span><span class="op">:</span> <span class="str">trivy-scan</span><span class="op">}</span>
+    <span class="key">runAfter</span><span class="op">:</span> <span class="op">[</span><span class="str">build</span><span class="op">]</span>
+  <span class="op">-</span> <span class="key">name</span><span class="op">:</span> <span class="str">deploy</span>
+    <span class="key">taskRef</span><span class="op">:</span> <span class="op">{</span><span class="key">name</span><span class="op">:</span> <span class="str">kubectl-apply</span><span class="op">}</span>
+    <span class="key">runAfter</span><span class="op">:</span> <span class="op">[</span><span class="str">scan</span><span class="op">]</span></pre>
+      </div>
+    </div>
+    <div class="card c-green">
+      <div class="card-header"><div class="card-icon bg-green">🔄</div><div><div class="card-title">ArgoCD GitOps</div><div class="card-sub">Git = source of truth</div></div></div>
+      <ul class="topic-list">
+        <li>ApplicationSet — multi-cluster, multi-env</li>
+        <li>Sync Waves — ordered deployment</li>
+        <li>Sync Hooks — pre/post/sync jobs</li>
+        <li>RBAC + SSO via OIDC (Citi LDAP)</li>
+        <li>Image Updater — auto-bump image tags</li>
+        <li>Diff view before sync</li>
+      </ul>
+    </div>
+    <div class="card c-amber">
+      <div class="card-header"><div class="card-icon bg-amber">🎯</div><div><div class="card-title">Argo Rollouts</div><div class="card-sub">Progressive delivery</div></div></div>
+      <div class="code-block">
+        <div class="code-block-header">canary — payment service</div>
+        <pre><span class="key">strategy</span><span class="op">:</span>
+  <span class="key">canary</span><span class="op">:</span>
+    <span class="key">steps</span><span class="op">:</span>
+    <span class="op">-</span> <span class="key">setWeight</span><span class="op">:</span> <span class="num">5</span>    <span class="cm"># 5% traffic</span>
+    <span class="op">-</span> <span class="key">pause</span><span class="op">:</span> <span class="op">{</span><span class="key">duration</span><span class="op">:</span> <span class="str">5m</span><span class="op">}</span>
+    <span class="op">-</span> <span class="key">setWeight</span><span class="op">:</span> <span class="num">25</span>
+    <span class="op">-</span> <span class="key">pause</span><span class="op">:</span> <span class="op">{</span><span class="key">duration</span><span class="op">:</span> <span class="str">10m</span><span class="op">}</span>
+    <span class="op">-</span> <span class="key">setWeight</span><span class="op">:</span> <span class="num">100</span>
+    <span class="key">analysis</span><span class="op">:</span>
+      <span class="key">templates</span><span class="op">:</span>
+      <span class="op">-</span> <span class="key">templateName</span><span class="op">:</span> <span class="str">error-rate</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     COMMANDS
+======================================================== -->
+<div class="section" id="commands">
+  <div class="section-header">
+    <div class="section-icon bg-purple">⌨️</div>
+    <div>
+      <div class="section-title">kubectl Commands</div>
+      <div class="section-desc">Production-ready reference grouped by task. Scroll horizontally on mobile to see full commands.</div>
+    </div>
+  </div>
+
+  <div class="divider">Cluster Info &amp; Context</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="cmd-table-wrap">
+      <table class="cmd-table">
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd">kubectl cluster-info</span></td><td class="cmd-desc">Show API server and CoreDNS URLs</td></tr>
+          <tr><td><span class="cmd">kubectl config get-contexts</span></td><td class="cmd-desc">List all kubeconfig contexts</td></tr>
+          <tr><td><span class="cmd">kubectl config use-context &lt;ctx&gt;</span></td><td class="cmd-desc">Switch cluster context</td></tr>
+          <tr><td><span class="cmd">kubectl get nodes -o wide</span></td><td class="cmd-desc">Nodes with IPs and OS info</td></tr>
+          <tr><td><span class="cmd">kubectl top nodes</span></td><td class="cmd-desc">Node CPU/memory usage</td></tr>
+          <tr><td><span class="cmd">kubectl api-resources</span></td><td class="cmd-desc">List all API resource types</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider">Pods &amp; Workloads</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="cmd-table-wrap">
+      <table class="cmd-table">
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd">kubectl get pods -A -o wide</span></td><td class="cmd-desc">All pods across all namespaces</td></tr>
+          <tr><td><span class="cmd">kubectl describe pod &lt;pod&gt; -n &lt;ns&gt;</span></td><td class="cmd-desc">Detailed pod events and status</td></tr>
+          <tr><td><span class="cmd">kubectl logs -f &lt;pod&gt; -c &lt;container&gt;</span></td><td class="cmd-desc">Stream container logs</td></tr>
+          <tr><td><span class="cmd">kubectl logs &lt;pod&gt; --previous</span></td><td class="cmd-desc">Logs from last crashed container</td></tr>
+          <tr><td><span class="cmd">kubectl exec -it &lt;pod&gt; -- bash</span></td><td class="cmd-desc">Interactive shell into container</td></tr>
+          <tr><td><span class="cmd">kubectl top pods --sort-by=memory</span></td><td class="cmd-desc">Resource usage by memory</td></tr>
+          <tr><td><span class="cmd">kubectl delete pod &lt;pod&gt; --force</span></td><td class="cmd-desc">Force-delete stuck pod</td></tr>
+          <tr><td><span class="cmd">kubectl get events --sort-by='.lastTimestamp'</span></td><td class="cmd-desc">Recent cluster events</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider">Deployments &amp; Rollouts</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="cmd-table-wrap">
+      <table class="cmd-table">
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd">kubectl rollout status deploy/&lt;name&gt;</span></td><td class="cmd-desc">Watch rollout progress</td></tr>
+          <tr><td><span class="cmd">kubectl rollout history deploy/&lt;name&gt;</span></td><td class="cmd-desc">View revision history</td></tr>
+          <tr><td><span class="cmd">kubectl rollout undo deploy/&lt;name&gt;</span></td><td class="cmd-desc">Rollback to previous revision</td></tr>
+          <tr><td><span class="cmd">kubectl scale deploy &lt;n&gt; --replicas=5</span></td><td class="cmd-desc">Manual scale</td></tr>
+          <tr><td><span class="cmd">kubectl set image deploy/&lt;d&gt; app=img:2.0</span></td><td class="cmd-desc">Update container image</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider">Debugging</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="cmd-table-wrap">
+      <table class="cmd-table">
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cmd">kubectl debug -it &lt;pod&gt; --image=busybox</span></td><td class="cmd-desc">Ephemeral debug container</td></tr>
+          <tr><td><span class="cmd">kubectl port-forward svc/&lt;svc&gt; 8080:80</span></td><td class="cmd-desc">Forward local port to service</td></tr>
+          <tr><td><span class="cmd">kubectl run tmp --image=curlimages/curl -it --rm</span></td><td class="cmd-desc">One-shot debug pod</td></tr>
+          <tr><td><span class="cmd">kubectl get pod &lt;pod&gt; -o yaml</span></td><td class="cmd-desc">Full pod YAML + scheduler decisions</td></tr>
+          <tr><td><span class="cmd">kubectl auth can-i list pods --as=sa</span></td><td class="cmd-desc">Test RBAC permissions for SA</td></tr>
+          <tr><td><span class="cmd">kubectl get endpoints &lt;svc&gt;</span></td><td class="cmd-desc">Check service → pod routing</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout tip" style="margin-top:28px;">
+    <div class="callout-title">Shell Aliases — Paste into ~/.bashrc</div>
+    <div class="code-block" style="margin-top:8px;">
+      <pre><span class="kw">alias</span> k=<span class="str">kubectl</span>
+<span class="kw">alias</span> kns=<span class="str">'kubectl config set-context --current --namespace'</span>
+<span class="kw">alias</span> kgp=<span class="str">'kubectl get pods -o wide'</span>
+<span class="kw">alias</span> kdp=<span class="str">'kubectl describe pod'</span>
+<span class="kw">alias</span> kaf=<span class="str">'kubectl apply -f'</span>
+<span class="kw">source</span> &lt;(kubectl completion bash)</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================
+     QUIZ
+======================================================== -->
+<div class="section" id="quiz">
+  <div class="section-header">
+    <div class="section-icon bg-purple">🧠</div>
+    <div>
+      <div class="section-title">Knowledge Check</div>
+      <div class="section-desc">CKA/CKAD-style questions. Tap an option to reveal the answer and explanation.</div>
+    </div>
+  </div>
+
+  <div id="quiz-container"></div>
+  <div style="margin-top:20px;">
+    <div class="quiz-score-display" id="quiz-score"></div>
+    <button class="btn-reset" onclick="resetQuiz()">↺ Reset Quiz</button>
+  </div>
+</div>
+
+</div><!-- /content-wrap -->
+</div><!-- /container -->
+
+<!-- FOOTER -->
+<div class="container">
+  <footer>
+    <div>☸️ K8s Learning Journey · DevOps / SRE Excellence</div>
+    <div style="margin-top:4px;">Covers Kubernetes 1.28+ · CKA · CKAD · CKS · OpenShift 4.x</div>
+    <div style="margin-top:8px;color:rgba(74,96,128,0.5);">
+      <a href="https://github.com" target="_blank" rel="noopener">⭐ Star on GitHub</a>
+      &nbsp;·&nbsp;
+      <a href="https://kubernetes.io/docs/" target="_blank" rel="noopener">📖 K8s Docs</a>
+      &nbsp;·&nbsp;
+      <a href="https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/" target="_blank" rel="noopener">🎓 CKA Cert</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+// ============================================================
+// NAVIGATION
+// ============================================================
+(function(){
+  const sections   = document.querySelectorAll('.section');
+  const allBtns    = document.querySelectorAll('[data-section]');
+  const mobileTitle = document.getElementById('mobileTitle');
+  const hamburger  = document.getElementById('hamburger');
+  const navDrawer  = document.getElementById('navDrawer');
+
+  function show(id) {
+    sections.forEach(s => s.classList.remove('active'));
+    allBtns.forEach(b => b.classList.remove('active'));
+
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
+
+    allBtns.forEach(b => {
+      if(b.dataset.section === id) b.classList.add('active');
+    });
+
+    // Update mobile title
+    const activeBtn = document.querySelector(`.nav-desktop [data-section="${id}"]`);
+    if(activeBtn && mobileTitle) mobileTitle.textContent = activeBtn.textContent.trim();
+
+    // Close drawer
+    navDrawer.classList.remove('open');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded','false');
+
+    // Scroll to top of content
+    window.scrollTo({top: 0, behavior:'smooth'});
+
+    // Update URL hash (for GitHub Pages deep linking)
+    history.replaceState(null, '', '#' + id);
+  }
+
+  allBtns.forEach(btn => {
+    btn.addEventListener('click', () => show(btn.dataset.section));
+  });
+
+  // Hamburger toggle
+  hamburger.addEventListener('click', () => {
+    const isOpen = navDrawer.classList.toggle('open');
+    hamburger.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // Hash routing on load (deep link support)
+  const hash = location.hash.replace('#','');
+  if(hash && document.getElementById(hash)) {
+    show(hash);
+  }
+})();
+
+// ============================================================
+// QUIZ
+// ============================================================
+const questions = [
+  {
+    q: "Which K8s component watches unscheduled Pods and assigns them to nodes?",
+    opts: ["kube-apiserver","kube-scheduler","kubelet","kube-controller-manager"],
+    answer: 1,
+    explanation: "kube-scheduler watches for Pods with no NodeName assigned and selects the best node using filtering and scoring."
+  },
+  {
+    q: "What is the correct command to roll back a Deployment to the previous version?",
+    opts: ["kubectl revert deploy/app","kubectl rollout undo deploy/app","kubectl rollback deploy/app","kubectl apply --previous deploy/app"],
+    answer: 1,
+    explanation: "kubectl rollout undo deploy/app rolls back to the previous ReplicaSet. Use --to-revision=N for a specific revision."
+  },
+  {
+    q: "A Pod is in 'CrashLoopBackOff'. What is the BEST first diagnostic step?",
+    opts: ["kubectl delete and redeploy","kubectl logs <pod> --previous","kubectl describe node","kubectl rollout restart"],
+    answer: 1,
+    explanation: "--previous shows logs from the last crashed container — the most direct path to root cause (OOM, config error, startup failure)."
+  },
+  {
+    q: "Which workload type should you use for a Kafka cluster?",
+    opts: ["Deployment","ReplicaSet","StatefulSet","DaemonSet"],
+    answer: 2,
+    explanation: "StatefulSet provides stable network identities (kafka-0, kafka-1), ordered startup/shutdown, and per-pod PVCs — essential for Kafka."
+  },
+  {
+    q: "What does maxUnavailable: 0 in a RollingUpdate strategy ensure?",
+    opts: ["Pauses the rollout","Zero-downtime — no old pod removed until new one is Ready","Prevents all updates","Limits to 0 new pods"],
+    answer: 1,
+    explanation: "maxUnavailable: 0 keeps every old pod running until its replacement is Ready. Pair with maxSurge: 1 for true zero-downtime rolling updates."
+  },
+  {
+    q: "In BFSI K8s clusters, which NetworkPolicy configuration is the security baseline?",
+    opts: ["Allow all ingress and egress","Default-deny all, then explicitly allow","Allow intra-namespace only","Allow from LoadBalancer only"],
+    answer: 1,
+    explanation: "Default-deny all (empty podSelector + Ingress+Egress policyTypes), then explicit allow rules. This implements least-privilege network segmentation."
+  },
+  {
+    q: "What is the purpose of a PodDisruptionBudget (PDB)?",
+    opts: ["Limit CPU/memory requests","Guarantee minimum pods available during voluntary disruptions","Auto-scale on disruption events","Block node upgrades"],
+    answer: 1,
+    explanation: "PDB defines minAvailable or maxUnavailable during voluntary disruptions (drains, upgrades) — protecting your SLA during maintenance."
+  },
+  {
+    q: "Which Argo Rollouts strategy sends a small traffic percentage to the new version first?",
+    opts: ["Blue/Green","Canary","Recreate","RollingUpdate"],
+    answer: 1,
+    explanation: "Canary routes a small percentage (e.g., 5%) to the new version, monitors metrics via AnalysisTemplate, and promotes or rolls back based on results."
+  }
+];
+
+let score = 0;
+let answered = new Set();
+
+function buildQuiz() {
+  const c = document.getElementById('quiz-container');
+  c.innerHTML = '';
+  questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-card';
+    div.innerHTML = `
+      <div class="quiz-q">
+        <span style="font-family:'Space Mono',monospace;color:var(--accent);margin-right:8px;">${String(i+1).padStart(2,'0')}.</span>${q.q}
+      </div>
+      <div class="quiz-options">
+        ${q.opts.map((o,j) => `<button class="quiz-opt" data-qi="${i}" data-oi="${j}">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="fb-${i}"></div>
+    `;
+    c.appendChild(div);
+  });
+
+  // Single event listener delegation
+  c.addEventListener('click', e => {
+    const btn = e.target.closest('.quiz-opt');
+    if(!btn) return;
+    const qi = parseInt(btn.dataset.qi);
+    const oi = parseInt(btn.dataset.oi);
+    answer(qi, oi);
+  });
+}
+
+function answer(qi, oi) {
+  if(answered.has(qi)) return;
+  answered.add(qi);
+  const q = questions[qi];
+  const opts = document.querySelectorAll(`[data-qi="${qi}"]`);
+  opts.forEach(b => { b.disabled = true; });
+
+  if(oi === q.answer) {
+    opts[oi].classList.add('correct');
+    score++;
+  } else {
+    opts[oi].classList.add('wrong');
+    opts[q.answer].classList.add('correct');
+  }
+
+  const fb = document.getElementById('fb-'+qi);
+  const isCorrect = oi === q.answer;
+  Object.assign(fb.style, {
+    background: isCorrect ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)',
+    border: `1px solid ${isCorrect ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
+    padding:'10px 14px', borderRadius:'6px',
+    fontSize:'0.82rem', color:'var(--muted)', lineHeight:'1.5'
+  });
+  fb.textContent = '💡 ' + q.explanation;
+  fb.classList.add('show');
+
+  if(answered.size === questions.length) {
+    const pct = Math.round((score / questions.length) * 100);
+    const msg = score >= 7 ? '🏆 CKA Ready!' : score >= 5 ? '⚡ Good progress — keep going' : '📚 Review the guide and retry';
+    document.getElementById('quiz-score').textContent = `Score: ${score}/${questions.length} (${pct}%) — ${msg}`;
+  }
+}
+
+function resetQuiz() {
+  score = 0;
+  answered.clear();
+  document.getElementById('quiz-score').textContent = '';
+  buildQuiz();
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
